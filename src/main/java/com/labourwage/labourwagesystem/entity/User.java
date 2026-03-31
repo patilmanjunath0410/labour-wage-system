@@ -43,6 +43,7 @@ public class User {
     private Site site;
 
     @Column(name = "is_active")
+    @Builder.Default
     private boolean isActive = true;
 
     @CreationTimestamp

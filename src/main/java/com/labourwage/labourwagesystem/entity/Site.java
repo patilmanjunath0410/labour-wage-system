@@ -37,6 +37,7 @@ public class Site {
     private String city;
 
     @Column(name = "is_active")
+    @Builder.Default
     private boolean isActive = true;
 
     @Column(name = "start_date")

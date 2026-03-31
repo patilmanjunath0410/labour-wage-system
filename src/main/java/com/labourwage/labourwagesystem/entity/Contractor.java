@@ -36,6 +36,7 @@ public class Contractor {
     private String address;
 
     @Column(name = "is_active", nullable = false)
+    @Builder.Default
     private boolean isActive = true;
 
     @CreationTimestamp
