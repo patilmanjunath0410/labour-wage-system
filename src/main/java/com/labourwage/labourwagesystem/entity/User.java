@@ -7,8 +7,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import java.time.Instant;
 import java.util.UUID;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "users")
@@ -31,14 +29,9 @@ public class User {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
-  /*  @Enumerated(EnumType.STRING)
-    @Column(nullable = false,
-            columnDefinition = "role_enum")
-    private RoleEnum role; */
-  @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
-  @JdbcTypeCode(SqlTypes.NAMED_ENUM)
-  private RoleEnum role;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private RoleEnum role;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "contractor_id")
@@ -49,7 +42,6 @@ public class User {
     private Site site;
 
     @Column(name = "is_active")
-    @Builder.Default
     private boolean isActive = true;
 
     @CreationTimestamp
