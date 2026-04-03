@@ -70,9 +70,15 @@ public class Worker {
     @Column(name = "emergency_contact")
     private String emergencyContact;
 
-    @Enumerated(EnumType.STRING)
+   /* @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private WorkerStatusEnum status = WorkerStatusEnum.ACTIVE;
+
+    */
+   @Enumerated(EnumType.STRING)
+   @Column(nullable = false, length = 20)
+   @Builder.Default
+   private WorkerStatusEnum status = WorkerStatusEnum.ACTIVE;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "site_id", nullable = false)
@@ -86,6 +92,7 @@ public class Worker {
     private String qrUrl;
 
     @Column(name = "otp_verified")
+    @Builder.Default
     private boolean otpVerified = false;
 
     @CreationTimestamp
