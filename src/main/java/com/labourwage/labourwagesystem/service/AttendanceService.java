@@ -42,10 +42,9 @@ public class AttendanceService {
             String supervisorPhone) {
 
         // 1. Verify QR signature
-        String[] parts = splitPayloadAndSignature(
-                req.getQrPayload());
-        if (parts == null || !qrCodeUtil.verifyQR(
-                parts[0], parts[1]))
+        // Verify QR signature
+        String[] parts = splitPayloadAndSignature(req.getQrPayload());
+        if (parts == null || !qrCodeUtil.verifyQR(parts[0], parts[1]))
             throw new RuntimeException(
                     "Invalid QR code — signature mismatch");
 

@@ -13,9 +13,6 @@ public class MarkAttendanceRequest {
     @NotBlank(message = "QR payload is required")
     private String qrPayload;
 
-    @NotBlank(message = "QR signature is required")
-    private String signature;
-
     @NotNull(message = "Attendance type is required")
     private AttendanceTypeEnum attendanceType;
 
