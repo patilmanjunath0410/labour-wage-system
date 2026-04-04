@@ -24,22 +24,13 @@ public class QRCodeUtil {
                              String workerCode,
                              String siteId) throws Exception {
 
-        // Build payload
-        String payload = String.format(
-                "{\"workerId\":\"%s\",\"workerCode\":\"%s\"," +
-                        "\"siteId\":\"%s\",\"issuedAt\":\"%s\"}",
+        String payload = buildPayload(
                 workerId, workerCode, siteId,
-                Instant.now().toString()
-        );
+                Instant.now().toString());
 
-        // Sign with HMAC-SHA256
-        String signature = new HmacUtils(
-                HmacAlgorithms.HMAC_SHA_256, secretKey)
-                .hmacHex(payload);
-
+        String signature = sign(payload);
         String signedPayload = payload + "." + signature;
 
-        // Generate QR using ZXing
         QRCodeWriter writer = new QRCodeWriter();
         BitMatrix matrix = writer.encode(
                 signedPayload,
@@ -56,9 +47,34 @@ public class QRCodeUtil {
 
     public boolean verifyQR(String payload,
                             String signature) {
-        String expected = new HmacUtils(
+        String expected = sign(payload);
+        System.out.println("Expected sig: " + expected);
+        System.out.println("Received sig: " + signature);
+        return expected.equals(signature);
+    }
+
+    public String buildSignedPayload(String workerId,
+                                     String workerCode,
+                                     String siteId,
+                                     String issuedAt) {
+        String payload = buildPayload(
+                workerId, workerCode, siteId, issuedAt);
+        return payload + "." + sign(payload);
+    }
+
+    private String buildPayload(String workerId,
+                                String workerCode,
+                                String siteId,
+                                String issuedAt) {
+        return String.format(
+                "{\"workerId\":\"%s\",\"workerCode\":\"%s\"," +
+                        "\"siteId\":\"%s\",\"issuedAt\":\"%s\"}",
+                workerId, workerCode, siteId, issuedAt);
+    }
+
+    private String sign(String payload) {
+        return new HmacUtils(
                 HmacAlgorithms.HMAC_SHA_256, secretKey)
                 .hmacHex(payload);
-        return expected.equals(signature);
     }
 }
