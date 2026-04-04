@@ -5,6 +5,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.springframework.stereotype.Component;
@@ -17,173 +18,204 @@ public class WageSlipPdfUtil {
     public byte[] generate(WageSlipResponse slip)
             throws Exception {
 
-        PDDocument doc = new PDDocument();
-        PDPage page = new PDPage(PDRectangle.A4);
-        doc.addPage(page);
+        try (PDDocument doc = new PDDocument()) {
 
-        PDType1Font fontBold = new PDType1Font(
-                doc, Standard14Fonts.FontName.HELVETICA_BOLD);
-        PDType1Font fontNormal = new PDType1Font(
-                doc, Standard14Fonts.FontName.HELVETICA);
+            PDPage page = new PDPage(PDRectangle.A4);
+            doc.addPage(page);
 
-        PDPageContentStream cs =
-                new PDPageContentStream(doc, page);
+            // PDFBox 3.x font loading — correct way
+            PDFont fontBold = new PDType1Font(
+                    Standard14Fonts.FontName.HELVETICA_BOLD);
+            PDFont fontNormal = new PDType1Font(
+                    Standard14Fonts.FontName.HELVETICA);
 
-        float margin = 50;
-        float y = 780;
-        float lineHeight = 20;
+            PDPageContentStream cs =
+                    new PDPageContentStream(doc, page);
 
-        // ── Header ──────────────────────────────
-        cs.beginText();
-        cs.setFont(fontBold, 16);
-        cs.newLineAtOffset(margin, y);
-        cs.showText("WAGE SLIP — FORM XIV");
-        cs.endText();
-        y -= lineHeight;
+            float margin     = 50;
+            float y          = 780;
+            float lineHeight = 20;
 
-        cs.beginText();
-        cs.setFont(fontNormal, 10);
-        cs.newLineAtOffset(margin, y);
-        cs.showText("(Under Contract Labour Regulation Act)");
-        cs.endText();
-        y -= lineHeight * 1.5f;
+            // ── Header ──────────────────────────
+            cs.beginText();
+            cs.setFont(fontBold, 16);
+            cs.newLineAtOffset(margin, y);
+            cs.showText("WAGE SLIP");
+            cs.endText();
+            y -= lineHeight;
 
-        // ── Divider ─────────────────────────────
-        cs.moveTo(margin, y);
-        cs.lineTo(545, y);
-        cs.stroke();
-        y -= lineHeight;
+            cs.beginText();
+            cs.setFont(fontNormal, 10);
+            cs.newLineAtOffset(margin, y);
+            cs.showText(
+                    "Contract Labour Regulation Act — Form XIV");
+            cs.endText();
+            y -= lineHeight * 1.5f;
 
-        // ── Company Info ────────────────────────
-        drawRow(cs, fontBold, fontNormal,
-                margin, y, "Company:", slip.getContractorName());
-        y -= lineHeight;
-        drawRow(cs, fontBold, fontNormal,
-                margin, y, "Site:", slip.getSiteName());
-        y -= lineHeight;
-        drawRow(cs, fontBold, fontNormal,
-                margin, y, "Month:",
-                slip.getSlipMonth().format(
-                        DateTimeFormatter.ofPattern("MMMM yyyy")));
-        y -= lineHeight * 1.5f;
+            // ── Divider ─────────────────────────
+            cs.moveTo(margin, y);
+            cs.lineTo(545, y);
+            cs.stroke();
+            y -= lineHeight;
 
-        // ── Worker Info ─────────────────────────
-        cs.beginText();
-        cs.setFont(fontBold, 12);
-        cs.newLineAtOffset(margin, y);
-        cs.showText("Worker Details");
-        cs.endText();
-        y -= lineHeight;
+            // ── Company Info ────────────────────
+            drawRow(cs, fontBold, fontNormal,
+                    margin, y,
+                    "Company:", slip.getContractorName());
+            y -= lineHeight;
 
-        drawRow(cs, fontBold, fontNormal,
-                margin, y, "Name:", slip.getWorkerName());
-        y -= lineHeight;
-        drawRow(cs, fontBold, fontNormal,
-                margin, y, "Worker Code:", slip.getWorkerCode());
-        y -= lineHeight;
-        drawRow(cs, fontBold, fontNormal,
-                margin, y, "Skill:", slip.getSkillType());
-        y -= lineHeight;
-        drawRow(cs, fontBold, fontNormal,
-                margin, y, "Daily Rate:",
-                "Rs. " + slip.getDailyWageRate());
-        y -= lineHeight * 1.5f;
+            drawRow(cs, fontBold, fontNormal,
+                    margin, y,
+                    "Site:", slip.getSiteName());
+            y -= lineHeight;
 
-        // ── Attendance Summary ───────────────────
-        cs.beginText();
-        cs.setFont(fontBold, 12);
-        cs.newLineAtOffset(margin, y);
-        cs.showText("Attendance Summary");
-        cs.endText();
-        y -= lineHeight;
+            drawRow(cs, fontBold, fontNormal,
+                    margin, y,
+                    "Month:",
+                    slip.getSlipMonth().format(
+                            DateTimeFormatter.ofPattern(
+                                    "MMMM yyyy")));
+            y -= lineHeight * 1.5f;
 
-        drawRow(cs, fontBold, fontNormal,
-                margin, y, "Full Days:",
-                String.valueOf(slip.getFullDays()));
-        y -= lineHeight;
-        drawRow(cs, fontBold, fontNormal,
-                margin, y, "Half Days:",
-                String.valueOf(slip.getHalfDays()));
-        y -= lineHeight;
-        drawRow(cs, fontBold, fontNormal,
-                margin, y, "Overtime Days:",
-                String.valueOf(slip.getOvertimeDays()));
-        y -= lineHeight;
-        drawRow(cs, fontBold, fontNormal,
-                margin, y, "Total Days Present:",
-                String.valueOf(slip.getTotalDaysPresent()));
-        y -= lineHeight * 1.5f;
+            // ── Worker Info ─────────────────────
+            cs.beginText();
+            cs.setFont(fontBold, 12);
+            cs.newLineAtOffset(margin, y);
+            cs.showText("Worker Details");
+            cs.endText();
+            y -= lineHeight;
 
-        // ── Wage Calculation ─────────────────────
-        cs.beginText();
-        cs.setFont(fontBold, 12);
-        cs.newLineAtOffset(margin, y);
-        cs.showText("Wage Calculation");
-        cs.endText();
-        y -= lineHeight;
+            drawRow(cs, fontBold, fontNormal,
+                    margin, y,
+                    "Name:", slip.getWorkerName());
+            y -= lineHeight;
 
-        drawRow(cs, fontBold, fontNormal,
-                margin, y, "Gross Wage:",
-                "Rs. " + slip.getGrossWage());
-        y -= lineHeight;
-        drawRow(cs, fontBold, fontNormal,
-                margin, y, "PF Deduction (12%):",
-                "Rs. " + slip.getPfDeduction());
-        y -= lineHeight;
-        drawRow(cs, fontBold, fontNormal,
-                margin, y, "ESI Deduction (0.75%):",
-                "Rs. " + slip.getEsiDeduction());
-        y -= lineHeight;
-        drawRow(cs, fontBold, fontNormal,
-                margin, y, "Advance Deduction:",
-                "Rs. " + slip.getAdvanceDeduction());
-        y -= lineHeight * 1.5f;
+            drawRow(cs, fontBold, fontNormal,
+                    margin, y,
+                    "Worker Code:", slip.getWorkerCode());
+            y -= lineHeight;
 
-        // ── Divider ─────────────────────────────
-        cs.moveTo(margin, y);
-        cs.lineTo(545, y);
-        cs.stroke();
-        y -= lineHeight;
+            drawRow(cs, fontBold, fontNormal,
+                    margin, y,
+                    "Skill:", slip.getSkillType());
+            y -= lineHeight;
 
-        // ── Net Wage ────────────────────────────
-        cs.beginText();
-        cs.setFont(fontBold, 14);
-        cs.newLineAtOffset(margin, y);
-        cs.showText("NET WAGE PAYABLE: Rs. "
-                + slip.getNetWage());
-        cs.endText();
-        y -= lineHeight * 2;
+            drawRow(cs, fontBold, fontNormal,
+                    margin, y,
+                    "Daily Rate (Rs.):",
+                    slip.getDailyWageRate().toString());
+            y -= lineHeight * 1.5f;
 
-        // ── Footer ──────────────────────────────
-        cs.moveTo(margin, y);
-        cs.lineTo(545, y);
-        cs.stroke();
-        y -= lineHeight;
+            // ── Attendance ──────────────────────
+            cs.beginText();
+            cs.setFont(fontBold, 12);
+            cs.newLineAtOffset(margin, y);
+            cs.showText("Attendance Summary");
+            cs.endText();
+            y -= lineHeight;
 
-        cs.beginText();
-        cs.setFont(fontNormal, 9);
-        cs.newLineAtOffset(margin, y);
-        cs.showText(
-                "This is a computer generated wage slip. " +
-                        "Generated by Labour Wage Management System.");
-        cs.endText();
+            drawRow(cs, fontBold, fontNormal,
+                    margin, y,
+                    "Full Days:",
+                    String.valueOf(slip.getFullDays()));
+            y -= lineHeight;
 
-        cs.close();
+            drawRow(cs, fontBold, fontNormal,
+                    margin, y,
+                    "Half Days:",
+                    String.valueOf(slip.getHalfDays()));
+            y -= lineHeight;
 
-        ByteArrayOutputStream out =
-                new ByteArrayOutputStream();
-        doc.save(out);
-        doc.close();
+            drawRow(cs, fontBold, fontNormal,
+                    margin, y,
+                    "Overtime Days:",
+                    String.valueOf(slip.getOvertimeDays()));
+            y -= lineHeight;
 
-        return out.toByteArray();
+            drawRow(cs, fontBold, fontNormal,
+                    margin, y,
+                    "Total Days Present:",
+                    String.valueOf(slip.getTotalDaysPresent()));
+            y -= lineHeight * 1.5f;
+
+            // ── Wage Calculation ─────────────────
+            cs.beginText();
+            cs.setFont(fontBold, 12);
+            cs.newLineAtOffset(margin, y);
+            cs.showText("Wage Calculation");
+            cs.endText();
+            y -= lineHeight;
+
+            drawRow(cs, fontBold, fontNormal,
+                    margin, y,
+                    "Gross Wage (Rs.):",
+                    slip.getGrossWage().toString());
+            y -= lineHeight;
+
+            drawRow(cs, fontBold, fontNormal,
+                    margin, y,
+                    "PF Deduction 12% (Rs.):",
+                    slip.getPfDeduction().toString());
+            y -= lineHeight;
+
+            drawRow(cs, fontBold, fontNormal,
+                    margin, y,
+                    "ESI Deduction 0.75% (Rs.):",
+                    slip.getEsiDeduction().toString());
+            y -= lineHeight;
+
+            drawRow(cs, fontBold, fontNormal,
+                    margin, y,
+                    "Advance Deduction (Rs.):",
+                    slip.getAdvanceDeduction().toString());
+            y -= lineHeight * 1.5f;
+
+            // ── Divider ─────────────────────────
+            cs.moveTo(margin, y);
+            cs.lineTo(545, y);
+            cs.stroke();
+            y -= lineHeight;
+
+            // ── Net Wage ────────────────────────
+            cs.beginText();
+            cs.setFont(fontBold, 14);
+            cs.newLineAtOffset(margin, y);
+            cs.showText("NET WAGE PAYABLE: Rs. "
+                    + slip.getNetWage());
+            cs.endText();
+            y -= lineHeight * 2;
+
+            // ── Footer ──────────────────────────
+            cs.moveTo(margin, y);
+            cs.lineTo(545, y);
+            cs.stroke();
+            y -= lineHeight;
+
+            cs.beginText();
+            cs.setFont(fontNormal, 8);
+            cs.newLineAtOffset(margin, y);
+            cs.showText(
+                    "Computer generated wage slip — " +
+                            "Labour Wage Management System");
+            cs.endText();
+
+            cs.close();
+
+            ByteArrayOutputStream out =
+                    new ByteArrayOutputStream();
+            doc.save(out);
+            return out.toByteArray();
+        }
     }
 
-    private void drawRow(PDPageContentStream cs,
-                         PDType1Font labelFont,
-                         PDType1Font valueFont,
-                         float x, float y,
-                         String label,
-                         String value) throws Exception {
+    private void drawRow(
+            PDPageContentStream cs,
+            PDFont labelFont,
+            PDFont valueFont,
+            float x, float y,
+            String label,
+            String value) throws Exception {
+
         cs.beginText();
         cs.setFont(labelFont, 10);
         cs.newLineAtOffset(x, y);
@@ -192,7 +224,7 @@ public class WageSlipPdfUtil {
 
         cs.beginText();
         cs.setFont(valueFont, 10);
-        cs.newLineAtOffset(x + 180, y);
+        cs.newLineAtOffset(x + 200, y);
         cs.showText(value != null ? value : "-");
         cs.endText();
     }
