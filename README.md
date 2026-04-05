@@ -30,6 +30,65 @@ React Router, Axios
 Frontend: http://localhost:5173  
 Backend: http://localhost:8080
 
+## API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | /api/v1/auth/register | Register contractor |
+| POST | /api/v1/auth/login | Login |
+| POST | /api/v1/workers/register | Register worker |
+| GET  | /api/v1/workers/site/{id} | Get site workers |
+| GET  | /api/v1/workers/{id}/qr | Download QR code |
+| POST | /api/v1/attendance/mark | Mark attendance |
+| POST | /api/v1/attendance/sync | Batch sync offline |
+| GET  | /api/v1/attendance/site/{id}/today | Today's attendance |
+| POST | /api/v1/wage-slips/generate/{id}/{y}/{m} | Generate slip |
+| GET  | /api/v1/wage-slips/pdf/{id} | Download PDF |
+
+## Database Schema
+8 tables: contractors, sites, users, workers,
+attendance, wage_slips, disputes, min_wage_rules
+
+## Running Locally
+
+### Prerequisites
+- Java 17
+- PostgreSQL 16
+- Node.js 20
+
+### Backend Setup
+```bash
+# Create database
+psql -U postgres
+CREATE DATABASE labour_wage_db;
+CREATE USER labour_admin WITH PASSWORD 'labour123';
+GRANT ALL PRIVILEGES ON DATABASE labour_wage_db TO labour_admin;
+
+# Run Spring Boot
+cd labour-wage-system
+./mvnw spring-boot:run
+```
+
+### Frontend Setup
+```bash
+# Switch to frontend branch
+git checkout frontend
+
+# Install and run
+npm install
+npm run dev
+```
+
+Open http://localhost:5173
+
+## Architecture Highlights
+- Flyway manages all DB migrations
+- JWT tokens for stateless authentication
+- HMAC-SHA256 signed QR codes prevent forgery
+- UPSERT queries ensure idempotent sync
+- PDFBox generates Form XIV compliant wage slips
+- Vite proxy forwards API calls to Spring Boot
+
 **Database:** PostgreSQL 16 with 8 normalized tables
 
 ## Running locally
