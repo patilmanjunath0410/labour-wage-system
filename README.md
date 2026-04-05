@@ -26,6 +26,10 @@ JWT, PostgreSQL, Flyway, ZXing, Apache PDFBox
 **Frontend:** React 18, Vite, Tailwind CSS, 
 React Router, Axios
 
+## Live Demo (Coming Soon)
+Frontend: http://localhost:5173  
+Backend: http://localhost:8080
+
 **Database:** PostgreSQL 16 with 8 normalized tables
 
 ## Running locally
