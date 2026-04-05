@@ -46,8 +46,17 @@ Backend: http://localhost:8080
 | GET  | /api/v1/wage-slips/pdf/{id} | Download PDF |
 
 ## Database Schema
-8 tables: contractors, sites, users, workers,
-attendance, wage_slips, disputes, min_wage_rules
+
+The system uses 8 core tables:
+
+- contractors
+- sites
+- users
+- workers
+- attendance
+- wage_slips
+- disputes
+- min_wage_rules
 
 ## Running Locally
 
@@ -78,6 +87,20 @@ git checkout frontend
 npm install
 npm run dev
 ```
+### Sample Request
+
+POST /api/v1/auth/login
+
+Request:
+{
+  "username": "contractor1",
+  "password": "password123"
+}
+
+Response:
+{
+  "token": "jwt_token_here"
+}
 
 Open http://localhost:5173
 
@@ -88,6 +111,8 @@ Open http://localhost:5173
 - UPSERT queries ensure idempotent sync
 - PDFBox generates Form XIV compliant wage slips
 - Vite proxy forwards API calls to Spring Boot
+
+- This system follows a RESTful architecture with a stateless backend using JWT authentication and a decoupled React frontend.
 
 **Database:** PostgreSQL 16 with 8 normalized tables
 
